@@ -1,4 +1,4 @@
-package com.example.kwuotes
+package com.example.my_kwuotes
 
 import org.junit.Test
 
