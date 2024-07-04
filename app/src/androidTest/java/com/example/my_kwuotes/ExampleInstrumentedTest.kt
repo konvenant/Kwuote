@@ -1,4 +1,4 @@
-package com.example.kwuotes
+package com.example.my_kwuotes
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
