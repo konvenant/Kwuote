@@ -245,37 +245,41 @@ fun QuoteHomeScreen(
                    modifier = Modifier.align(Alignment.Center)
                )
            } else {
-               if(quotes.itemSnapshotList.isNotEmpty()){
-                   LazyColumn (
-                       state = lazyListState,
-                       contentPadding = PaddingValues(bottom = 62.dp)
-                   ) {
-                       items(quotes, key = {it.id}){  quote ->
-                           if (quote != null) {
-                               QuoteItem(quote,lazyListState){ q ->
-                                   navController.navigate(NavHelper.QuoteScreen.route+"/${q.quoteId}"+"/${q.category}")
-                               }
-                           }
-                       }
-
-                       item {
-                           if (quotes.loadState.append is LoadState.Loading) {
-                               Box(modifier = Modifier.fillMaxWidth()){
-                                   CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                               }
-                           }
-                       }
-                   }
+               if(quotes.loadState.refresh is LoadState.Error){
+                   NullItem(modifier = Modifier.fillMaxSize(), stringResource(id = R.string.error_loading_more_quotes))
                } else{
-                   Box(
-                       modifier = Modifier
-                           .fillMaxSize()
-                           .clickable { },
-                       contentAlignment = Alignment.Center
-                   ){
-                       NullItem(modifier = Modifier.fillMaxSize(),text = stringResource(R.string.no_quote_found_for_this_category))
-                   }
+                   if(quotes.itemSnapshotList.isNotEmpty()){
+                       LazyColumn (
+                           state = lazyListState,
+                           contentPadding = PaddingValues(bottom = 62.dp)
+                       ) {
+                           items(quotes, key = {it.id}){  quote ->
+                               if (quote != null) {
+                                   QuoteItem(quote,lazyListState){ q ->
+                                       navController.navigate(NavHelper.QuoteScreen.route+"/${q.quoteId}"+"/${q.category}")
+                                   }
+                               }
+                           }
 
+                           item {
+                               if (quotes.loadState.append is LoadState.Loading) {
+                                   Box(modifier = Modifier.fillMaxWidth()){
+                                       CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                                   }
+                               }
+                           }
+                       }
+                   } else{
+                       Box(
+                           modifier = Modifier
+                               .fillMaxSize()
+                               .clickable { },
+                           contentAlignment = Alignment.Center
+                       ){
+                           NullItem(modifier = Modifier.fillMaxSize(),text = stringResource(R.string.no_quote_found_for_this_category))
+                       }
+
+                   }
                }
 
            }
