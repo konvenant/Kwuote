@@ -165,34 +165,42 @@ constructor(
         }
     }
 
-     fun getRandomQuote()  {
+    fun getRandomQuote() {
         randomQuote.postValue(Resource.Loading())
-        try {
-           if (hasInternetConnection()){
-               viewModelScope.launch {
-                   val response = getRandomQuoteUseCase.invoke()
-                   if (response.isSuccessful){
-                       response.body()?.let {
-                           randomQuote.postValue(Resource.Success(it))
-                       }
-                   } else{
-                       randomQuote.postValue(Resource.Error(getError(response.errorBody()?.string())))
-                   }
-               }
-           } else {
-               viewModelScope.launch {
-                   val randomQuoteFromBd = quoteRepository.getRandomQuoteFromDb()
-                   randomQuoteFromBd?.let {
-                       randomQuote.postValue(Resource.Success(it.toRandomQuote()))
-                   }
-               }
-           }
 
-        } catch (e: Exception) {
-            randomQuote.postValue(Resource.Error(e.message!!))
+        viewModelScope.launch {
+            try {
+                if (hasInternetConnection()) {
+                    val response = getRandomQuoteUseCase.invoke()
+                    if (response.isSuccessful) {
+                        response.body()?.let {
+                            randomQuote.postValue(Resource.Success(it))
+                        } ?: run {
+                            randomQuote.postValue(Resource.Error("No data"))
+                        }
+                    } else {
+                        randomQuote.postValue(Resource.Error(getError(response.errorBody()?.string())))
+                    }
+                } else {
+                    try {
+                        val randomQuoteFromDb = quoteRepository.getRandomQuoteFromDb()
+                        randomQuoteFromDb?.let {
+                            randomQuote.postValue(Resource.Success(it.toRandomQuote()))
+                        } ?: run {
+                            randomQuote.postValue(Resource.Error("No data in database"))
+                        }
+                    } catch (e: Exception) {
+                        randomQuote.postValue(Resource.Error("Database error: ${e.message}"))
+                    }
+                }
+            } catch (e: Exception) {
+                randomQuote.postValue(Resource.Error("Network error: ${e.message}"))
+            }
         }
-
     }
+
+
+
 
     fun getRandomQuoteForWorker() {
         viewModelScope.launch {
